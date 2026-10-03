@@ -153,6 +153,18 @@ stack as arbitrary-length little-endian values (instead of CScriptNum):
 # OP_ROLL
 # OP_IFDUP
 # OP_CHECKSIGADD
+# OP_NOT
+# OP_0NOTEQUAL
+# OP_BOOLAND
+# OP_BOOLOR
+# OP_NUMEQUAL
+# OP_NUMEQUALVERIFY
+# OP_NUMNOTEQUAL
+# OP_LESSTHAN
+# OP_GREATERTHAN
+# OP_LESSTHANOREQUAL
+# OP_GREATERTHANOREQUAL
+# OP_WITHIN
 
 For OP_CHECKLOCKTIMEVERIFY and OP_CHECKSEQUENCEVERIFY, the operand is decoded
 and costed as an arbitrary-length unsigned integer.  However, the decoded
@@ -233,10 +245,10 @@ an opcode performs both word-rounded interpretation and exact byte movement.
 |OP_SUBSTR
 |127
 |<nowiki>[A BEGIN LEN]</nowiki>
-|Extract bytes BEGIN through BEGIN+LEN of A
+|Extract bytes BEGIN through BEGIN+LEN-1 of A
 |
 # Pop operands off the stack.
-# Remove BEGIN bytes from the front of A (all bytes if BEGIN is greater than length of A).
+# Remove value(BEGIN) bytes from the front of A (all bytes if value(BEGIN) is greater than length(A)).
 # If length(A) is greater than value(LEN), truncate A to length value(LEN).
 # Push A onto the stack.
 |(wordspan(LEN) + wordspan(BEGIN)) * 2 + MIN(Value of LEN, MAX(length(A) - Value of BEGIN, 0)) * 3
@@ -367,7 +379,7 @@ OP_DOWNSHIFT (née OP_RSHIFT).
 |Move bits of A right by BITS (numerically increase)
 |
 # Pop operands off the stack.
-# If A shifted by value(BITS) would exceed the individual stack limit, fail.
+# If length(A) + ceil(value(BITS) / 8) would exceed the individual stack limit, fail.
 # If value(BITS) % 8 == 0: simply prepend value(BITS) / 8 zeroes to A.
 # Otherwise: prepend (value(BITS) / 8) + 1 zeroes to A, then shift A *down* (8 - (value(BITS) % 8)) bits.
 # Push A onto the stack.
@@ -380,8 +392,8 @@ OP_DOWNSHIFT (née OP_RSHIFT).
 |Move bits of A left by BITS (numerically decrease)
 |
 # Pop operands off the stack.
-# For BITOFF from 0 to (length(A)-1) * 8 - value(BITS):
-## Copy each bit in A from BITOFF + value(BITS) to BITOFF.
+# For each bit position BITOFF in A:
+## Set it to A's original bit at BITOFF + value(BITS), or zero if that source bit does not exist.
 # Truncate A to remove value(BITS) / 8 bytes from the end (or all bytes, if value(BITS) / 8 > length(A)).
 # Push A onto the stack.
 |wordspan(BITS) * 2 + MAX((length(A) - (Value of BITS) / 8), 0) * 3
@@ -514,10 +526,11 @@ The opcodes OP_ADD, OP_SUB, OP_1ADD and OP_1SUB are redefined in 0xC2 Tapscript 
 # Pop operands off the stack.
 # Option 1: trim trailing zeroes off A and B.
 # If B is longer than A, swap A and B.
-# For each byte in B, add it and previous overflow into the equivalent byte in A, remembering next overflow.
+# For each byte in A, add the equivalent byte in B (or zero if B has no byte there) and previous overflow, remembering next overflow.
 # If there was final overflow, append a 1 byte to A.
 # Option 2: If there was no final overflow, remember last non-zero byte written into A, and truncate A after that point.
 # Either Option 1 or Option 2 MUST be implemented.
+# Push A onto the stack.
 |MAX(wordspan(A), wordspan(B)) * 9
 |ARITH + COPYING
 |-
@@ -537,9 +550,10 @@ The opcodes OP_ADD, OP_SUB, OP_1ADD and OP_1SUB are redefined in 0xC2 Tapscript 
 |Subtract B from A where B is <= A
 |
 # Pop operands off the stack.
-# For each byte in B, subtract it and previous underflow from the equivalent byte in A, remembering next underflow.
-# If there was final underflow, fail validation.
+# For each byte in A, subtract the equivalent byte in B (or zero if B has no byte there) and previous underflow, remembering next underflow.
+# If there was final underflow, or any byte of B beyond A is non-zero, fail validation.
 # Remember last non-zero byte written into A, and truncate A after that point.
+# Push A onto the stack.
 |MAX(wordspan(A), wordspan(B)) * 6
 |ARITH
 |-
