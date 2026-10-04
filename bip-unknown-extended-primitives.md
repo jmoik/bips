@@ -209,6 +209,16 @@ Without this BIP, each assigned opcode is an OP_SUCCESS opcode in Tapleaf 0xc2. 
 
 A prototype of all three opcodes, with the costs above, is part of the Bitcoin Core Tapleaf 0xc2 prototype implementing BIPs 440 and 441: <https://github.com/jmoik/bitcoin/tree/gsr>.  The prototype is not an activation or deployment.
 
+## Test Vectors
+
+[`bip-0441/extended_primitives.json`](bip-0441/extended_primitives.json) contains the vectors, in the format of the Tapleaf 0xC2 BIPs described in [`bip-0441/README.md`](bip-0441/README.md).  They cover:
+
+- OP_CHECKSIGFROMSTACK: valid and invalid signatures, the empty signature, empty and unknown public key types, messages of 0 to 4,000,000 bytes, and the BIP 340 test vectors.
+- OP_TWEAKADD: the BIP 449 vectors, a BIP 341 output key, a tweak equal to `n`, an x-coordinate not on the curve, a result at infinity, and inputs of incorrect length.
+- OP_BYTEREV: empty, single-byte and maximum-size elements, and the TapBranch order of reversed hashes.
+
+[`bip-0441/extended_primitives_examples.json`](bip-0441/extended_primitives_examples.json) contains a valid spend of each construction in [Examples](#examples), and of the encoding conversions in the OP_BYTEREV rationale.
+
 ## Changelog
 
 - 0.1.0: Initial draft.

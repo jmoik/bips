@@ -345,6 +345,10 @@ Before activation, opcode `0xbf` remains OP_SUCCESS191 in `0xc2` leaves. Definin
 
 The Bitcoin Core Tapleaf 0xc2 prototype implements OP_TX: <https://github.com/jmoik/bitcoin/tree/gsr>.
 
+## Test Vectors
+
+[`bip-0441/op_tx.json`](bip-0441/op_tx.json) contains the OP_TX vectors, in the format of the Tapleaf 0xC2 BIPs described in [`bip-0441/README.md`](bip-0441/README.md). Each gives a stack and a script using OP_TX, run in a transaction context, and its final stack and cost or its failure. [`bip-unknown-optx/reference.py`](bip-unknown-optx/reference.py) is an independent implementation of OP_TX's selectors, results and charges, and checks the vectors whose scripts use only pushes, OP_NOP, OP_DROP, OP_TOALTSTACK, OP_CODESEPARATOR and OP_TX.
+
 ## Changelog
 
 - 0.2.0: 2026-09-30: fully specify OP_TX using a versioned six byte selector, stack operands for indices and ranges, scoped input and output fields, default and COLLATE outputs, resource accounting, and future selector versions.
