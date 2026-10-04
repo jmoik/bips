@@ -348,6 +348,10 @@ Work in progress:
 
 	https://github.com/jmoik/bitcoin/tree/gsr
 
+==Test Vectors==
+
+[[bip-0441/varops.json|varops.json]] gives the cost of every primitive, and of the opcodes of this BIP and BIP 441 across operand sizes, and the transaction budget.  The format is described in [[bip-0441/README.md|bip-0441/README.md]].
+
 ==Changelog==
 
 * 0.3.0: 2026-09-30: exclude legacy, witness version 0, key-path and Tapleaf 0xC0 inputs from funding the budget; charge a fixed cost for every opcode and literal push; compose data-dependent costs from measured primitives, priced from a multi-machine calibration; charge one SIGCHECK for every elliptic-curve operation, including the commitment check of each funding Taproot script-path input; state when linear and superlinear operations are charged; add security considerations for the shared budget.

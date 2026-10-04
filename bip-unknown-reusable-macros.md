@@ -194,6 +194,14 @@ OP_MACRO 04 <ref 21> <ref 21> # body 22: fails at its second reference, at 4,194
 OP_SUCCESS80                  # main script
 ```
 
+## Test Vectors and Reference Code
+
+[`bip-0441/reusable_macros.json`](bip-0441/reusable_macros.json) contains scan vectors (the `decoding` group), unrolling vectors and execution vectors, in the format of the Tapleaf 0xC2 BIPs described in [`bip-0441/README.md`](bip-0441/README.md).  [`bip-0441/evaluator.py`](bip-0441/evaluator.py), written from the BIP texts alone, checks every vector.  Implementations should check that:
+
+- scan results match, including failures at the size limit;
+- unrolled scripts and totals match;
+- the committed script and its unrolled script give the same result and final stack, and their charges differ by exactly the unrolling charge.
+
 ## Security Considerations
 
 Nested references let a small committed script describe a large unrolled script, so script weight alone no longer bounds the number of executed operations.  The size limit bounds the unrolled script's memory to 4,000,000 bytes per script.  This assumes the unrolled script is written in one pass that follows each reference into its body, in time linear in the unrolled length and references visited.  Unrolling each body separately first would hold every intermediate expansion, which neither the limit nor the charge bounds.  The unrolling charge is computed and paid before the unrolled script is constructed, so unrolling work is metered even when the unrolled script is tiny.  Execution of the unrolled script is metered by BIP 440 as for any script.

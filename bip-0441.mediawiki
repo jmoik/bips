@@ -581,6 +581,10 @@ Work in progress:
 
 	https://github.com/jmoik/bitcoin/tree/gsr
 
+==Test Vectors==
+
+[[bip-0441/tapleaf_0xc2.json|tapleaf_0xc2.json]] covers Tapscript 0xC2 execution, limits, OP_SUCCESS, signature messages and complete spends.  [[bip-0441/README.md|bip-0441/README.md]] describes the format and the vectors of the companion BIPs.
+
 ==Changelog==
 
 * 0.3.0: 2026-09-30: compose opcode costs from BIP440's primitives; charge MUL one row per word of the shorter operand; charge signature work only for a nonempty signature; specify numeric operand handling precisely; state that BIP342's sigops budget does not apply; add security considerations.
