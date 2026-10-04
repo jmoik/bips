@@ -208,6 +208,14 @@ Without this BIP, both assigned opcodes are OP_SUCCESS opcodes in Tapleaf 0xc2. 
 
 The Bitcoin Core Tapleaf 0xc2 prototype implements the scan with its size limit, unrolling with its charge, and execution of the unrolled script: <https://github.com/jmoik/bitcoin/tree/gsr>.
 
+## Test Vectors
+
+[`bip-0441/reusable_macros.json`](bip-0441/reusable_macros.json) contains scan vectors (the `decoding` group), unrolling vectors and execution vectors, in the format of the Tapleaf 0xc2 BIPs described in [`bip-0441/README.md`](bip-0441/README.md).  [`bip-0441/evaluator.py`](bip-0441/evaluator.py), written from the BIP texts alone, checks every vector.  Implementations should check that:
+
+- scan results match, including failures at the size limit;
+- unrolled scripts and totals match;
+- the committed script and its unrolled script give the same result and final stack, and their charges differ by exactly the unrolling charge.
+
 ## Changelog
 
 - 0.1.0: 2026-10-27: initial draft.
