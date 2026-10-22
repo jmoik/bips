@@ -104,7 +104,7 @@ The following are not included.  Each can be proposed separately if a constructi
 | --- | --- |
 | Verify-style elliptic-curve opcodes (Elements `OP_TWEAKVERIFY`, `OP_ECMULSCALARVERIFY`) | OP_TWEAKADD covers the tweak and pushes the key, which a script can compare with OP_TX data or pass to OP_CHECKSIGFROMSTACK; `OP_TWEAKADD <Q> OP_EQUALVERIFY` gives the verify form.  General scalar multiplication is left to a separate proposal. |
 | OP_INTERNALKEY ([BIP349](bip-0349.md)) | OP_TX's `CURRENT_INTERNAL_KEY`. |
-| OP_MULTI and iteration opcodes | No construction needs them; repeated code uses [Reusable Macros](bip-unknown-reusable-macros.md). |
+| OP_MULTI and iteration opcodes | They add consensus and review surface while saving a negligible share of a transaction's size: repeated code uses [Reusable Macros](bip-unknown-reusable-macros.md). |
 | OP_CHECKCONTRACTVERIFY ([BIP443](bip-0443.mediawiki)) | Its output-program commitment is expressible (see [State-Carrying Output](#state-carrying-output)); its amount semantics are not addressed. |
 | OP_SEGMENT (segmented evaluation, in which an OP_SUCCESS opcode affects only its own segment) | For a covenant that requires a fixed prefix, such as a delay, ahead of script another party supplies in the same leaf (see [Composing Leaves](#composing-leaves)), as proposed for Tapscript v2.  It changes BIP 342's OP_SUCCESS scan; whether it is useful enough to add is open for discussion. |
 

@@ -144,9 +144,8 @@ implementation does under one deployment.
   a covenant require a fixed prefix, such as a delay, ahead of script
   another party supplies in the same leaf.
 - **Arity opcode.** Whether OP_MULTI, which lets the following opcode take
-  a variable number of operands, is worth adding. Extended Primitives leaves
-  it out because no construction needs it and Reusable Macros handle
-  repeated code.
+  a variable number of operands, is worth adding. It would let a script
+  combine a large, variable number of values, such as input amounts.
 - **Amount accounting across inputs.** Whether an opcode such as
   OP_FORWARDAMOUNT should let the node check the amounts that several inputs
   claim, which script cannot express.
