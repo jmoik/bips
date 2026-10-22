@@ -102,10 +102,13 @@ Byte 3 contains both input and output scopes. Bits 4–7 select the input scope,
 | `0x02` | ALL | Every input or output, in ascending index order | None |
 | `0x03` | SINGLE | The input or output at `index` | `<index>` |
 | `0x04` | RANGE | The inputs or outputs in `[start, start + count)`, in ascending index order | `<start> <count>` |
+| `0x05` | RANGE_OR_EMPTY | The inputs or outputs in `[start, start + count)`, in ascending index order, including those that do not exist | `<start> <count>` |
 
 Each scope operand is decoded as a BIP441 arbitrary-length unsigned integer, as for OP_CHECKLOCKTIMEVERIFY; execution fails if its value is 2<sup>32</sup> or more. Input scope operands are deepest on the stack, followed by output scope operands and then the selector. OP_TX consumes only the operands required by the two scopes; any lower stack elements remain unchanged.
 
 `CURRENT`, `SINGLE`, and `RANGE` fail if any selected input or output does not exist. `RANGE` requires `count >= 1`, `start < total`, and `count <= total - start`.
+
+`RANGE_OR_EMPTY` requires `1 <= count <= 32768` and never fails because a selected input or output does not exist. For each selected field, a missing input or output pushes an empty stack element, which is also the number zero, and contributes no bytes to a `COLLATE` result. An input scope of `RANGE_OR_EMPTY` cannot select `INPUT_WITNESS_ITEMS`.
 
 #### Input and Output Field Masks
 
@@ -209,6 +212,7 @@ OP_TX_SELECT(k) = 1550 + 620 k
 
 - Each selected transaction-wide field, current-execution field, and field of each selected input or output counts one.
 - `INPUT_WITNESS_ITEMS` instead counts one for each selected input, plus one for each of its witness items, including empty items.
+- Each selected field of a missing input or output under `RANGE_OR_EMPTY` also counts one.
 - `INPUT_TOTAL_AMOUNT` adds the number of inputs, and `OUTPUT_TOTAL_AMOUNT` adds the number of outputs.
 - `TX_WEIGHT` adds the number of inputs, outputs, and witness items in the transaction.
 
@@ -225,6 +229,8 @@ The `OP_TX_SELECT` coefficients come from the same measurement procedure and rou
 OP_TX reads one selector from the stack. This follows the general approach of [BIP346](bip-0346.md) OP_TXHASH, but the selector bytes are different. OP_TX returns the selected fields themselves, either separately or collated, so scripts can use selected amounts in arithmetic instead of receiving only a hash.
 
 The fixed six-byte selector keeps every field and scope choice visible in one value. `SINGLE` indices and `RANGE` bounds are separate numeric operands because scripts may calculate them from transaction data.
+
+`RANGE_OR_EMPTY` lets a script handle up to a fixed number of inputs or outputs without first checking how many exist: summing the amounts of up to five inputs takes one OP_TX and four OP_ADDs. It is a separate scope so that `RANGE` still fails for a missing input or output, because a check applied to every selected entry, such as a maximum amount, passes for an empty one. Under `COLLATE`, a missing entry contributes no bytes, so a collated result never contains values absent from the transaction; selecting `INPUT_TOTAL_COUNT` or `OUTPUT_TOTAL_COUNT` also commits to how many entries exist. `INPUT_WITNESS_ITEMS` is excluded because it is the only field without a single value per input: a missing input would push nothing, like an input with an empty witness. The limit on `count` is BIP441's limit on stack elements, which a larger range would exceed without `COLLATE`, and it bounds the number of missing entries an implementation processes with `COLLATE`.
 
 Within version 0, undefined selector bits and scope values fail. The separate version byte preserves those strict rules while reserving an explicit namespace in which a future soft fork can define a different selector layout.
 

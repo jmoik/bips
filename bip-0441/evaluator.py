@@ -1273,12 +1273,13 @@ class Interpreter:
             raise Fail('TX_SELECTOR')
         fmt, current, scopes, in_fields, out_fields = selector[1:]
         in_scope, out_scope = scopes >> 4, scopes & 0x0f
-        if (in_scope > 4 or out_scope > 4 or out_fields & 0xfc
+        if (in_scope > 5 or out_scope > 5 or out_fields & 0xfc
                 or (in_scope == 0) != (in_fields == 0)
                 or (out_scope == 0) != (out_fields == 0)
+                or (in_scope == 5 and in_fields & 0x80)
                 or not (fmt & 0xfe or current or in_fields or out_fields)):
             raise Fail('TX_SELECTOR')
-        operand_count = {0: 0, 1: 0, 2: 0, 3: 1, 4: 2}
+        operand_count = {0: 0, 1: 0, 2: 0, 3: 1, 4: 2, 5: 2}
         n_in, n_out = operand_count[in_scope], operand_count[out_scope]
         if len(st) < n_in + n_out:
             raise Fail('INVALID_STACK_OPERATION')
@@ -1299,6 +1300,10 @@ class Interpreter:
                 return list(range(total))
             elif scope == 3:
                 chosen = [ops[0]]
+            elif scope == 5:                     # RANGE_OR_EMPTY
+                if not 1 <= ops[1] <= MAX_STACK_ITEMS:
+                    raise Fail('TX_SELECTOR')
+                return list(range(ops[0], ops[0] + ops[1]))
             else:
                 if ops[1] < 1:
                     raise Fail('TX_SELECTOR')
@@ -1339,6 +1344,10 @@ class Interpreter:
                 number(sum(o.value for o in spent), 8)
                 k_extra += len(tx.vin)
             for i in inputs:
+                if i >= len(tx.vin):             # missing: empty per field
+                    for _ in range(bin(in_fields).count('1')):
+                        add('missing', b'', None)
+                    continue
                 txin, prev = tx.vin[i], spent[i]
                 if in_fields & 0x01:
                     fixed(txin.prevout_hash)
@@ -1364,6 +1373,10 @@ class Interpreter:
                 number(sum(o.value for o in tx.vout), 8)
                 k_extra += len(tx.vout)
             for o in outputs:
+                if o >= len(tx.vout):
+                    for _ in range(bin(out_fields).count('1')):
+                        add('missing', b'', None)
+                    continue
                 if out_fields & 0x01:
                     number(tx.vout[o].value, 8)
                 if out_fields & 0x02:
@@ -1394,6 +1407,8 @@ class Interpreter:
                 return value.to_bytes(width, 'little'), enc(value)
             if kind == 'count':
                 return compact_size(value), None
+            if kind == 'missing':
+                return b'', b''
             if kind == 'string':
                 return ser_string(value), value
             return value, value
